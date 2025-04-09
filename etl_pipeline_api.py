@@ -77,7 +77,7 @@ def load_data_to_db(df):
                 humidity INTEGER,
                 weather TEXT,
                 wind_speed REAL,
-                timestamp TIMESTAMP
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
@@ -85,10 +85,10 @@ def load_data_to_db(df):
         for index, row in df.iterrows():
             cursor.execute(
                 sql.SQL('''
-                    INSERT INTO weather (city, temperature, humidity, weather, wind_speed, timestamp)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    INSERT INTO weather (city, temperature, humidity, weather, wind_speed)
+                    VALUES (%s, %s, %s, %s, %s)
                 '''),
-                (row['city'], row['temperature'], row['humidity'], row['weather'], row['wind_speed'], pd.to_datetime('now'))
+                (row['city'], row['temperature'], row['humidity'], row['weather'], row['wind_speed'])
             )
 
         # Commit and close connection
@@ -101,16 +101,17 @@ def load_data_to_db(df):
             logger.error(f"Error loading data to PostgreSQL: {e}")
     
 if __name__ == "__main__":
-    city = "Vancouver"
-    weather_data = extract_weather_data(city)
-    if weather_data:
-        df = pd.DataFrame([weather_data])
-        logger.info(f"Dataframe created:\n{df}")
-        transformed_data = transform_weather_data(weather_data)
-        load_data_to_db(transformed_data)
-        # Save to CSV or any other format as needed
-        df.to_csv(f"transformed_data.csv", index=False)
-        logger.info(f"Data saved to transformed_data.csv")
-    else:
-        logger.error("No data to save.")
+    cities = ["Vancouver", "Toronto", "New York", "Seoul"]
+    for city in cities:
+        weather_data = extract_weather_data(city)
+        if weather_data:
+            df = pd.DataFrame([weather_data])
+            logger.info(f"Dataframe created:\n{df}")
+            transformed_data = transform_weather_data(weather_data)
+            load_data_to_db(transformed_data)
+            # Save to CSV or any other format as needed
+            df.to_csv(f"transformed_data.csv", index=False)
+            logger.info(f"Data saved to transformed_data.csv")
+        else:
+            logger.error(f"❌ No data extracted for {city}. ETL process skipped.")
         
