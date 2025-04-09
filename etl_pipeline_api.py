@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 # Extract Weather Data
 def extract_weather_data(city):
-    url = f"{API_URL}?q={city}&appid={API_KEY}"
+    url = f"{API_URL}?q={city}&appid={API_KEY}&units=metric"
     logger.info(f"Extracting weather data for {city} from API: {url}")
     response = requests.get(url)
 
@@ -101,7 +101,7 @@ def load_data_to_db(df):
             logger.error(f"Error loading data to PostgreSQL: {e}")
     
 if __name__ == "__main__":
-    city = "London"
+    city = "Vancouver"
     weather_data = extract_weather_data(city)
     if weather_data:
         df = pd.DataFrame([weather_data])
