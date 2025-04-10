@@ -6,8 +6,10 @@ This project is a simple yet powerful ETL (Extract, Transform, Load) pipeline th
 ```bash
 etl-pipeline-api/
 ├── .env                   # Environment variables (API key, DB credentials)
+├── docker-compose.yml     #docker-compose.yml file to build and launch the docker container
+├── Dockerfile             #Dockerizing the script
 ├── venv/                  # Python virtual environment
-├── main.py                # Main ETL script
+├── etl_pipeline_api.py    # Main ETL script
 ├── README.md              # Project documentation
 ├── requirements.txt       # Python dependencies
 └── transformed_data.csv   # Sample CSV output (optional)
@@ -64,7 +66,7 @@ POSTGRES_PORT=5432
 
 5. **Run the ETL pipeline**
 ```bash
-python main.py
+python etl_pipeline_api.py
 ```
 This will extract weather data from the API, transform it, and load it into your PostgreSQL database.
 
