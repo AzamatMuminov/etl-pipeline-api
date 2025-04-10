@@ -108,9 +108,9 @@ if __name__ == "__main__":
             df = pd.DataFrame([weather_data])
             logger.info(f"Dataframe created:\n{df}")
             transformed_data = transform_weather_data(weather_data)
-            load_data_to_db(transformed_data)
             # Save to CSV or any other format as needed
             df.to_csv(f"transformed_data.csv", index=False)
+            load_data_to_db(transformed_data)
             logger.info(f"Data saved to transformed_data.csv")
         else:
             logger.error(f"❌ No data extracted for {city}. ETL process skipped.")

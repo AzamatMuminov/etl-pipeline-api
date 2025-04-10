@@ -22,7 +22,7 @@ services:
       - db
     networks:
       - weather_network
-    command: python main.py
+    command: python etl_pipeline_api.py
 
 volumes:
   weather_db_data:
