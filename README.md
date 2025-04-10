@@ -20,6 +20,7 @@ etl-pipeline-api/
 ✅ Loads data into a PostgreSQL database  
 ✅ Includes logging for monitoring ETL process  
 ✅ Supports environment variables for better security  
+✅ Supports Docker for easier setup and deployment
 
 ## Requirements
 
@@ -42,12 +43,12 @@ python -m venv venv
 .\venv\Scripts\activate  # For Windows
 source venv/bin/activate  # For MacOS/Linux
 ```
-3. ***Install Dependencies**
+3. **Install Dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Set up your .env file
+4. **Set up your .env file**
     
     Create a .env file in the root directory and add:
 ```
@@ -65,9 +66,62 @@ POSTGRES_PORT=5432
 ```bash
 python main.py
 ```
+This will extract weather data from the API, transform it, and load it into your PostgreSQL database.
+
+## Docker Setup
+
+This project comes with Docker and Docker Compose configurations for running the application inside containers.
+
+### 1. Docker Prerequisites
+
+Before using Docker, make sure you have:
+- **Docker** installed: [Install Docker](https://docs.docker.com/get-docker/)
+- **Docker Compose** installed: [Install Docker Compose](https://docs.docker.com/compose/install/)
+
+### 2. Docker Compose Configuration
+
+The `docker-compose.yml` file in this project defines two services:
+
+1. **PostgreSQL** - runs the database container.
+2. **ETL Python Application** - runs the ETL process and connects to the database.
+
+### 3. Set up Docker
+
+Ensure that your `.env` file is configured properly (as shown earlier). Then, follow these steps:
+
+#### 4. Run the application using Docker Compose
+
+```bash
+docker-compose up
+```
+- This command will automatically build the images for your application and PostgreSQL, and start both containers.
+
+- The Python ETL script will run and the data will be loaded into the PostgreSQL database.
+
+#### 5. Access the PostgreSQL container
+To access the Postgres database inside the Docker container, run the following command:
+```bash
+docker-compose exec weather_postgres psql -U weather_user -d weather_data
+```
+
+This will allow you to run SQL queries inside the container. For example:
+```sql
+\dt      -- list tables
+SELECT * FROM weather; -- view your weather data
+```
+### Summary of Docker-related commands
+
+| Command                                         | Description                                                       |
+|-------------------------------------------------|-------------------------------------------------------------------|
+| `docker-compose up`                             | Build and start the containers                                    |
+| `docker-compose exec weather_postgres psql`      | Access the Postgres container to run SQL queries                  |
+| `docker-compose logs -f weather_etl`            | View logs of the ETL container                                    |
+| `docker-compose down`                           | Stop and remove the containers and volumes                        |
+| `docker-compose run weather_etl`                | Rerun the ETL script in the Python container                      |
+
 
 ##  Output
 
-Transformed weather data saved in transformed_data.csv
+- Transformed weather data saved in **transformed_data.csv**
 
-Data loaded into PostgreSQL table: weather
+- Data loaded into PostgreSQL table: **weather**
