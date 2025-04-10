@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . . 
 
 # Run the Python script when the container starts
-CMD ["python", "etl_pipeline_api.py"]
+CMD ["python", "src/etl_pipeline_api.py"]
