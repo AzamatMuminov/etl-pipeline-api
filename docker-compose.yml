@@ -1,32 +1,70 @@
+version: "3.9"
+
+###############################
+#  Weather ETL – Full Stack   #
+###############################
+
 services:
-  db:
-    image: postgres:14
+  # ───────────────────────────
+  # 1. Postgres (persistent)
+  # ───────────────────────────
+  weather_postgres:
+    image: postgres:14-alpine
     container_name: weather_postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: weather_data
-      POSTGRES_USER: weather_user
-      POSTGRES_PASSWORD: P@$$w0rd!
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - weather_pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    volumes:
-      - weather_db_data:/var/lib/postgresql/data
-    networks:
-      - weather_network
 
+  # ───────────────────────────
+  # 2. FastAPI HTTP server
+  #    (exposes /weather + /run)
+  # ───────────────────────────
+  weather_api:
+    build: .
+    container_name: weather_api
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app         # hot-reload while developing
+    environment:
+      POSTGRES_HOST: weather_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      # pass through your OpenWeather key if the API server needs it
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+    depends_on:
+      - weather_postgres
+    ports:
+      - "8000:8000"
+
+  # ───────────────────────────
+  # 3. One-shot ETL runner
+  #    • Executes python etl.py, then exits
+  #    • Re-usable for manual runs: docker compose run weather_etl
+  # ───────────────────────────
   weather_etl:
     build: .
     container_name: weather_etl
-    env_file:
-      - .env
-    depends_on:
-      - db
-    networks:
-      - weather_network
     command: python src/etl_pipeline_api.py
+    volumes:
+      - .:/app
+    environment:
+      POSTGRES_HOST: weather_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY:-}
+    depends_on:
+      - weather_postgres
+    restart: unless-stopped     # don’t keep restarting once the script finishes
 
 volumes:
-  weather_db_data:
-
-networks:
-  weather_network:
-    driver: bridge
+  weather_pgdata:
